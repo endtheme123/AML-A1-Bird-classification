@@ -2,4 +2,5 @@ data/Test
 data/Train
 data/TrainCompact
 __pycache__
-
+results/*
+checkpoints/*

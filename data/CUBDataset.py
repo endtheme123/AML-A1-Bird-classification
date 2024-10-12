@@ -24,11 +24,12 @@ data_transforms = {
 DATA_ROOT = "/home/endtheme/git/bird-class/data/"
 
 class CUBTrainDataset(torch.utils.data.Dataset):
-    def __init__(self, root, transform=None):
+    def __init__(self, root, transform=None, compact=False):
         # self.data = datasets.ImageFolder(root=os.path.join(root, 'train' if train else 'test'), transform=transform)
-        txt_path = os.path.join(root, "train.txt")
+        txt_path = os.path.join(root, "compact.txt" if compact else "train.txt")
         # self.labels = []
         # img_paths = []
+        self.compact = compact
         self.root = root
         self.data = pd.read_csv(txt_path, sep=" ", names= ["path", "label"])
         self.img_paths = self.data["path"].unique().tolist()
@@ -49,7 +50,7 @@ class CUBTrainDataset(torch.utils.data.Dataset):
         return len(self.img_paths)
     
     def __getitem__(self, idx):
-        img = Image.open(os.path.join(self.root, "Train", self.img_paths[idx]))
+        img = Image.open(os.path.join(self.root, "TrainCompact" if self.compact else "Train", self.img_paths[idx]))
         if self.transform:
             # print(self.transform)
             img = self.transform(img)

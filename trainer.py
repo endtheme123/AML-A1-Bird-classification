@@ -11,7 +11,7 @@ class Trainer:
         self.test_loader = test_loader
         # self.val_loader = val_loader
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = optim.Adam(self.model.parameters(), lr=1e-4)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
         self.device = device
         self.output_dir="./checkpoints"
         self.result_dir="./results"
@@ -24,16 +24,17 @@ class Trainer:
             os.mkdir(self.result_dir)
         self.writer = SummaryWriter(self.result_dir)
     def train(self, epochs=10):
+        training_loss_list = []
+        training_acc_list= []
+        testing_loss_list= []
+        testing_acc_list= []
         for epoch in tqdm(range(epochs)):
             self.model.train()
             running_loss = 0.0
             gt = []
             pred = []
 
-            training_loss_list = []
-            training_acc_list= []
-            testing_loss_list= []
-            testing_acc_list= []
+            
             count = 0
             print()
             for (inputs, labels) in self.train_loader:
@@ -61,7 +62,7 @@ class Trainer:
                 # correct += (predicted == labels).sum().item()
             training_loss = running_loss / count
             training_loss_list.append(training_loss)
-            train_accuracy = sum([1 for g, p in zip(gt, pred) if g == p]) / len(gt)
+            train_accuracy = 100*sum([1 for g, p in zip(gt, pred) if g == p]) / len(gt)
             training_acc_list.append(train_accuracy)
 
             val_loss, val_acc = self.validate()
@@ -74,34 +75,36 @@ class Trainer:
             print(f"Epoch [{epoch + 1}/{epochs}], Loss: {running_loss/len(self.train_loader)}, Accuracy: {train_accuracy}%")
             if(epoch+1) % 5 == 0 or epoch == 0:
                 self.writer.add_scalar(
-                    f"training_loss{epoch}",
+                    f"training_loss",
                     training_loss,
                     epochs,
                 )
                 self.writer.add_scalar(
-                    f"training_acc{epoch}",
+                    f"training_acc",
                     train_accuracy,
                     epochs,
                 )
                 self.writer.add_scalar(
-                    f"testing_loss{epoch}",
+                    f"testing_loss",
                     val_loss,
                     epochs,
                 )
                 self.writer.add_scalar(
-                    f"testing_acc{epoch}",
+                    f"testing_acc",
                     val_acc,
                     epochs,
                 )
                 
                 torch.save(self.model.state_dict(), os.path.join(self.output_dir, f"Epoch_{epoch + 1}.pth"))
             # self.validate()
-        plot_graph(testing_loss_list, training_loss_list, os.path.join(self.plot_dir, 'Loss.png'), "loss")
-        plot_graph(testing_acc_list, training_acc_list, os.path.join(self.plot_dir, 'Acc.png'), "Accuracy")
+        print(testing_loss_list)
+        print(training_loss_list)
+        self.plot_graph(testing_loss_list, training_loss_list, os.path.join(self.plot_dir, 'Loss.png'), "loss")
+        self.plot_graph(testing_acc_list, training_acc_list, os.path.join(self.plot_dir, 'Acc.png'), "Accuracy")
 
     def validate(self):
         self.model.eval()
-
+        valid_loss = 0.0
         count = 0
         gt = []
         pred = []
@@ -119,7 +122,7 @@ class Trainer:
                 # update-average-validation-loss
                 valid_loss += loss.item()
             val_loss = valid_loss/count
-            val_accuracy = sum([1 for g, p in zip(gt, pred) if g == p]) / len(gt)
+            val_accuracy = 100*sum([1 for g, p in zip(gt, pred) if g == p]) / len(gt)
         #     correct = 0
         #     total = 0
         # with torch.no_grad():
@@ -135,9 +138,13 @@ class Trainer:
         return val_loss, val_accuracy
 
 
-    def plot_graph(plot_list_val, plot_list_train, fig_path, graph_for):
+    def plot_graph(self, plot_list_val, plot_list_train, fig_path, graph_for):
         from matplotlib import pyplot as plt
+        plt.figure(figsize=(8, 6))
         plt.plot(plot_list_train, label=f'train_{graph_for}')
         plt.plot(plot_list_val,label=f'val_{graph_for}')
+        plt.title('Train vs Validation Loss')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
         plt.legend()
         plt.savefig(fig_path)

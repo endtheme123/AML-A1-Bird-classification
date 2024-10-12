@@ -31,6 +31,6 @@ for _, row in selected_images.iterrows():
     shutil.copyfile(src, dst)
 
 # Save the new annotation file
-selected_images.to_csv(new_annotation_file, index=False)
+selected_images[['image_name', "label"]].to_csv(new_annotation_file,sep=' ', header=False, index=False)
 
 print("Process complete! Images and new annotation file are saved.")
