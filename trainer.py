@@ -60,7 +60,7 @@ class Trainer:
                 count = count+1
                 # total += labels.size(0)
                 # correct += (predicted == labels).sum().item()
-            training_loss = running_loss / count
+            training_loss = running_loss
             training_loss_list.append(training_loss)
             train_accuracy = 100*sum([1 for g, p in zip(gt, pred) if g == p]) / len(gt)
             training_acc_list.append(train_accuracy)
@@ -122,6 +122,8 @@ class Trainer:
                 # update-average-validation-loss
                 valid_loss += loss.item()
             val_loss = valid_loss/count
+            print(len(gt))
+            print(sum([1 for g, p in zip(gt, pred) if g == p]))
             val_accuracy = 100*sum([1 for g, p in zip(gt, pred) if g == p]) / len(gt)
         #     correct = 0
         #     total = 0
