@@ -31,6 +31,7 @@ class CUBTrainDataset(torch.utils.data.Dataset):
         # img_paths = []
         self.root = root
         self.data = pd.read_csv(txt_path, sep=" ", names= ["path", "label"])
+        self.img_paths = self.data["path"].unique().tolist()
         # with open(txt_path, 'r') as file:
         #     for line in file:
         # # Remove any trailing characters like newlines or spaces
@@ -48,10 +49,11 @@ class CUBTrainDataset(torch.utils.data.Dataset):
         return len(self.img_paths)
     
     def __getitem__(self, idx):
-        img = Image.open(self.img_paths[idx])
+        img = Image.open(os.path.join(self.root, "Train", self.img_paths[idx]))
         if self.transform:
+            # print(self.transform)
             img = self.transform(img)
-        label = self.labels[idx]
+        label = self.data.iloc[idx, 1]
         return img, label
 
 
@@ -59,18 +61,21 @@ class CUBTestDataset(torch.utils.data.Dataset):
     def __init__(self, root, transform=None):
         # self.data = datasets.ImageFolder(root=os.path.join(root, 'train' if train else 'test'), transform=transform)
         txt_path = os.path.join(root, "test.txt")
-        self.labels = []
-        img_paths = []
-        with open(txt_path, 'r') as file:
-            for line in file:
-        # Remove any trailing characters like newlines or spaces
-                line = line.strip().split(" ")
-                print("img: ", line[0])
-                print("label: ", int(line[1])) 
-                self.labels.append(int(line[1]))
-                img_paths.append(line[0])
+        # self.labels = []
+        # img_paths = []
+        self.root = root
+        self.data = pd.read_csv(txt_path, sep=" ", names= ["path", "label"])
+        self.img_paths = self.data["path"].unique().tolist()
+        # with open(txt_path, 'r') as file:
+        #     for line in file:
+        # # Remove any trailing characters like newlines or spaces
+        #         line = line.strip().split(" ")
+        #         print("img: ", line[0])
+        #         print("label: ", int(line[1])) 
+        #         self.labels.append(int(line[1]))
+        #         img_paths.append(line[0])
 
-        self.img_paths = [os.path.join(root, "Test", img) for img in img_paths]
+        # self.img_paths = [os.path.join(root, "Train", img) for img in img_paths]
         self.transform = transform
 
         
@@ -78,10 +83,10 @@ class CUBTestDataset(torch.utils.data.Dataset):
         return len(self.img_paths)
     
     def __getitem__(self, idx):
-        img = Image.open(self.img_paths[idx])
+        img = Image.open(os.path.join(self.root, "Test", self.img_paths[idx]))
         if self.transform:
             img = self.transform(img)
-        label = self.labels[idx]
+        label = self.data.iloc[idx, 1]
         return img, label
 
 # Create Datasets

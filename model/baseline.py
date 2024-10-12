@@ -9,6 +9,6 @@ class BirdClassifier(nn.Module):
         num_features = self.model.fc.in_features
         # Replace the last fully connected layer
         self.model.fc = nn.Linear(num_features, num_classes)
-    
+
     def forward(self, x):
-        return self.model(x)
+        return nn.Softmax(dim = 1)(self.model(x))
