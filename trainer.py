@@ -5,17 +5,18 @@ import os
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
 class Trainer:
-    def __init__(self, model, train_loader, test_loader, device='cuda'):
+    def __init__(self, model, train_loader, test_loader, experiment_name, device='cuda'):
         self.model = model.to(device)
         self.train_loader = train_loader
         self.test_loader = test_loader
         # self.val_loader = val_loader
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = optim.Adam(self.model.model.fc.parameters(), lr=0.001)
+        self.optimizer = optim.Adam(self.model.model.parameters(), lr=0.001)
         self.device = device
-        self.output_dir="./checkpoints"
-        self.result_dir="./results"
-        self.plot_dir = "./plots"
+        self.experiment_name = experiment_name
+        self.output_dir=os.path.join("./checkpoints", experiment_name)
+        self.result_dir=os.path.join("./results" , experiment_name)
+        self.plot_dir = os.path.join("./plots" , experiment_name)
         if(not os.path.exists(self.output_dir)):
             os.mkdir(self.output_dir)
         if(not os.path.exists(self.plot_dir)):
@@ -110,6 +111,7 @@ class Trainer:
                 data = data.type(torch.FloatTensor).to(self.device)
                 target = target.to(self.device)
                 output = self.model(data)
+                # prob = nn.Softmax(dim = 1)(output)
                 preds = torch.argmax(output, axis=1).tolist()
                 labels = target.tolist()
                 loss = self.criterion(output, target)

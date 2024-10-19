@@ -4,3 +4,5 @@ data/TrainCompact
 __pycache__
 results/*
 checkpoints/*
+data/Test.zip
+data/Train.zip

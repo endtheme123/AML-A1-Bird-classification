@@ -23,4 +23,28 @@ class BirdClassifier(nn.Module):
                 param.requires_grad = True
 
     def forward(self, x):
-        return nn.Softmax(dim = 1)(self.model(x))
+        return self.model(x)
+
+
+
+class EfficientBirdClassifier(nn.Module):
+    def __init__(self, num_classes=200, freeze = False):
+        super(EfficientBirdClassifier, self).__init__()
+        # Use a pre-trained ResNet and fine-tune it
+        self.model = models.efficientnet_b4(pretrained=True)
+        
+        classifier = nn.Sequential(
+            nn.Linear(in_features=self.model.classifier[1].in_features, out_features=2048,bias=True),
+            nn.Dropout(),
+            nn.Linear(in_features=2048, out_features=200,bias=True)
+        )
+        self.model.classifier  = classifier
+
+        if freeze:
+            for param in self.model.parameters():
+                param.requires_grad = False
+            for param in self.model.classifier.parameters():
+                param.requires_grad = True
+
+    def forward(self, x):
+        return self.model(x)
