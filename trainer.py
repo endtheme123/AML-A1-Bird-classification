@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import os
 from tqdm import tqdm
+from grokfast import *
 from torch.utils.tensorboard import SummaryWriter
 class Trainer:
     def __init__(self, model, train_loader, test_loader, experiment_name, device='cuda'):
@@ -17,6 +18,12 @@ class Trainer:
         self.output_dir=os.path.join("./checkpoints", experiment_name)
         self.result_dir=os.path.join("./results" , experiment_name)
         self.plot_dir = os.path.join("./plots" , experiment_name)
+        if(not os.path.exists("./plots")):
+            os.mkdir("./plots")
+        if(not os.path.exists("./checkpoints")):
+            os.mkdir("./checkpoints")
+        if(not os.path.exists("./results")):
+            os.mkdir("./results")
         if(not os.path.exists(self.output_dir)):
             os.mkdir(self.output_dir)
         if(not os.path.exists(self.plot_dir)):
@@ -29,6 +36,7 @@ class Trainer:
         training_acc_list= []
         testing_loss_list= []
         testing_acc_list= []
+        grads = None
         for epoch in tqdm(range(epochs)):
             self.model.train()
             running_loss = 0.0
@@ -42,14 +50,16 @@ class Trainer:
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
                 self.optimizer.zero_grad()
-
-                outputs = self.model(inputs)
-                # print(outputs)
-                loss = self.criterion(outputs, labels)
+                with torch.set_grad_enabled(True):
+                    outputs = self.model(inputs)
+                    # print(outputs)
+                    loss = self.criterion(outputs, labels)
+                    running_loss += loss.item()
                 loss.backward()
+                grads = gradfilter_ema(self.model, grads=grads, alpha=0.98, lamb=2.0)
                 self.optimizer.step()
 
-                running_loss += loss.item()
+                
                 _, predicted = torch.max(outputs, 1)
 
                 running_corrects += sum(1 for a, b in zip(predicted, labels) if a == b)
@@ -72,7 +82,7 @@ class Trainer:
 
 
             print(f"Epoch [{epoch + 1}/{epochs}], Loss: {running_loss/len(self.train_loader)}, Accuracy: {train_accuracy}%")
-            if(epoch+1) % 5 == 0 or epoch == 0:
+            if(epoch+1) % 1000 == 0 or epoch == 0:
                 self.writer.add_scalar(
                     f"training_loss",
                     training_loss,
