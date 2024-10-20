@@ -66,9 +66,9 @@ class Trainer:
                 _, predicted = torch.max(outputs, 1)
 
                 running_corrects += sum(1 for a, b in zip(predicted, labels) if a == b)
-                print("output: ",outputs)
-                print("predicted: ",predicted)
-                print("labels: ",labels)
+                # print("output: ",outputs)
+                # print("predicted: ",predicted)
+                # print("labels: ",labels)
                 # total += labels.size(0)
                 # correct += (predicted == labels).sum().item()
             training_loss = running_loss/len(self.train_loader.dataset)

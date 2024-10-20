@@ -2,10 +2,10 @@ import torch.nn as nn
 import torchvision.models as models
 
 class BirdClassifier(nn.Module):
-    def __init__(self, num_classes=200, freeze = False):
+    def __init__(self, num_classes=200, freeze = False, pretrained = True):
         super(BirdClassifier, self).__init__()
         # Use a pre-trained ResNet and fine-tune it
-        self.model = models.resnet50(pretrained=True)
+        self.model = models.resnet50(pretrained=pretrained)
         
         num_features = self.model.fc.in_features
         print( num_features)
@@ -29,10 +29,10 @@ class BirdClassifier(nn.Module):
 
 
 class EfficientBirdClassifier(nn.Module):
-    def __init__(self, num_classes=200, freeze = False):
+    def __init__(self, num_classes=200, freeze = False,pretrained=True):
         super(EfficientBirdClassifier, self).__init__()
         # Use a pre-trained ResNet and fine-tune it
-        self.model = models.efficientnet_b4(pretrained=True)
+        self.model = models.efficientnet_b4(pretrained=pretrained)
         
         classifier = nn.Sequential(
             nn.Linear(in_features=self.model.classifier[1].in_features, out_features=2048,bias=True),
