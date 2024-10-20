@@ -11,3 +11,6 @@ def get_dataloader(data_path, train_transform, test_transform, batch_size, shuff
     test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
     
     return train_loader, test_loader
+
+
+

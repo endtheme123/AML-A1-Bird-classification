@@ -6,12 +6,14 @@ from tqdm import tqdm
 from grokfast import *
 from torch.utils.tensorboard import SummaryWriter
 class Trainer:
-    def __init__(self, model, train_loader, test_loader, experiment_name, device='cuda'):
+    def __init__(self, model, train_loader, test_loader, experiment_name, device='cuda', grokking = False):
         self.model = model.to(device)
         self.train_loader = train_loader
         self.test_loader = test_loader
+        self.grokking = grokking
         # self.val_loader = val_loader
         self.criterion = nn.CrossEntropyLoss()
+        
         self.optimizer = optim.Adam(self.model.model.parameters(), lr=0.001)
         self.device = device
         self.experiment_name = experiment_name
@@ -56,7 +58,8 @@ class Trainer:
                     loss = self.criterion(outputs, labels)
                     running_loss += loss.item()
                 loss.backward()
-                grads = gradfilter_ema(self.model, grads=grads, alpha=0.98, lamb=2.0)
+                if(self.grokking):   
+                    grads = gradfilter_ema(self.model, grads=grads, alpha=0.98, lamb=2.0)
                 self.optimizer.step()
 
                 

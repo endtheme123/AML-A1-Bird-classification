@@ -8,6 +8,7 @@ class BirdClassifier(nn.Module):
         self.model = models.resnet50(pretrained=True)
         
         num_features = self.model.fc.in_features
+        print( num_features)
         # Replace the last fully connected layer
         self.model.fc = nn.Sequential(
             nn.Linear(in_features=num_features, out_features=2048,bias=True),
