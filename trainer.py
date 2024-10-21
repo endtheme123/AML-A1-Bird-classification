@@ -85,24 +85,24 @@ class Trainer:
 
 
             print(f"Epoch [{epoch + 1}/{epochs}], Loss: {running_loss/len(self.train_loader)}, Accuracy: {train_accuracy}%")
-            if(epoch+1) % 1000 == 0 or epoch == 0:
+            if(epoch+1) % 5 == 0 or epoch == 0:
                 self.writer.add_scalar(
-                    f"training_loss",
+                    f"training_loss/num{epoch}",
                     training_loss,
                     epochs,
                 )
                 self.writer.add_scalar(
-                    f"training_acc",
+                    f"training_acc/num{epoch}",
                     train_accuracy,
                     epochs,
                 )
                 self.writer.add_scalar(
-                    f"testing_loss",
+                    f"testing_loss/num{epoch}",
                     val_loss,
                     epochs,
                 )
                 self.writer.add_scalar(
-                    f"testing_acc",
+                    f"testing_acc/num{epoch}",
                     val_acc,
                     epochs,
                 )
