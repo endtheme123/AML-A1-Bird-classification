@@ -82,3 +82,28 @@ def plot_confusion_matrix_sklearn(model, dataloader, class_names, device='cuda')
     plt.show()
 
 
+import torch
+
+def calculate_top1_accuracy(model, dataloader, device='cuda'):
+    model.eval()  # Set the model to evaluation mode
+    correct = 0   # To keep track of correct predictions
+    total = 0     # To keep track of the total number of samples
+    
+    with torch.no_grad():  # Disable gradient calculations during evaluation
+        for inputs, labels in dataloader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            
+            # Get model outputs (logits or scores)
+            outputs = model(inputs)
+            
+            # Get the index of the class with the highest score (top-1)
+            _, predicted = torch.max(outputs, 1)
+            
+            # Compare predicted class to true labels
+            correct += (predicted == labels).sum().item()  # Count correct predictions
+            total += labels.size(0)  # Total number of samples
+    
+    # Calculate accuracy as the ratio of correct predictions to total samples
+    top1_accuracy = correct / total * 100  # In percentage
+    return top1_accuracy
+
